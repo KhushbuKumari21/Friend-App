@@ -1,0 +1,58 @@
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Root Element Styling */
+#root {
+  height: 100vh; /* Make sure the root element takes up the full height of the viewport */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Basic Resets */
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit; /* Use the color defined for the parent element */
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mb-1 {
+  margin-bottom: 8px;
+}
+
+.p-1 {
+  padding: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Responsive styles for smaller screens */
+  body {
+    padding: 10px;
+  }
+
+  #root {
+    padding: 10px;
+  }
+}
