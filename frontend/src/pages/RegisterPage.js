@@ -1,69 +1,91 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './RegisterPage.css'; // Import the CSS file
 
-function RegisterPage() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+const RegisterPage = () => {
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+    });
+
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState('');
     const navigate = useNavigate(); // Initialize useNavigate
 
-    const handleRegister = async () => {
-        if (password.length < 6) {
-            console.error('Password must be at least 6 characters long');
-            setError('Password must be at least 6 characters long');
-            return;
-        }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
 
-        if (!email) {
-            console.error('Email is required');
-            setError('Email is required');
-            return;
-        }
-        
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', {
-                username,
-                email, // Include email in the request
-                password
+            // Register the user
+            const response = await axios.post('http://localhost:5000/api/auth/register', formData);
+            setSuccess(response.data.message);
+            setError(null);
+
+            // Automatically log in after registration
+            const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+                email: formData.email,
+                password: formData.password,
             });
-            console.log('Registration success:', response.data);
-            navigate('/login'); // Navigate after successful registration
-        } catch (error) {
-            console.error('Registration error:', error.response.data);
-            setError('Registration failed');
+            localStorage.setItem('token', loginResponse.data.token); // Store the token
+            setSuccess('Registration and login successful');
+            
+            // Redirect to login page after success
+            navigate('/login'); // Adjust the path according to your route configuration
+        } catch (err) {
+            setError(err.response?.data?.error || 'Registration failed');
+            setSuccess('');
         }
     };
 
     return (
-        <div>
+        <div className="register-page">
             <h2>Register</h2>
-            <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="Username"
-                required
-            />
-            <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-            />
-            <button onClick={handleRegister}>Register</button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <form onSubmit={handleSubmit} className="register-form">
+                <div className="form-group">
+                    <label>Username:</label>
+                    <input
+                        type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Email:</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Password:</label>
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <button type="submit" className="submit-button">Register</button>
+            </form>
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
         </div>
     );
-}
+};
 
 export default RegisterPage;

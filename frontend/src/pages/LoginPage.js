@@ -1,72 +1,71 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './LoginPage.css'; // Import the CSS file
 
-function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+const LoginPage = () => {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
 
-    const handleLogin = async (e) => {
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState('');
+
+    const navigate = useNavigate(); // Initialize useNavigate
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
-                email,
-                password
-            }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            // Store the token in local storage
-            localStorage.setItem('token', response.data.token);
-
-            // Navigate to home page or any other page
-            navigate('/');
-        } catch (error) {
-            // Display specific error messages based on error response
-            const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
-            setError(errorMessage);
-            console.error('Login error:', error.response?.data || error.message);
-        } finally {
-            setLoading(false);
+            const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+            localStorage.setItem('token', response.data.token); // Store the token
+            setSuccess('Login successful');
+            setError(null);
+            navigate('/dashboard'); // Redirect to dashboard
+        } catch (err) {
+            setError(err.response?.data?.error || 'Login failed');
+            setSuccess('');
         }
     };
 
     return (
-        <div>
+        <div className="login-page">
             <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-                <div>
+            <form onSubmit={handleSubmit} className="login-form">
+                <div className="form-group">
                     <label>Email:</label>
                     <input
                         type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="Email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label>Password:</label>
                     <input
                         type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
                         required
                     />
                 </div>
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
+                <button type="submit" className="submit-button">Login</button>
             </form>
-            {error && <p>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
         </div>
     );
-}
+};
 
 export default LoginPage;

@@ -1,17 +1,10 @@
+// src/components/PrivateRoute.js
 import React from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom'; // Only import what you use
 
-const PrivateRoute = () => {
-    const isAuthenticated = !!localStorage.getItem('token');
-    const navigate = useNavigate();
-
-    React.useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/login');
-        }
-    }, [isAuthenticated, navigate]);
-
-    return isAuthenticated ? <Outlet /> : null;
+const PrivateRoute = ({ children }) => {
+  const isAuthenticated = Boolean(localStorage.getItem('token')); // Example check
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 export default PrivateRoute;
